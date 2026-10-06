@@ -54,6 +54,7 @@ const frontend = `<!doctype html>
       .booking { display: flex; justify-content: space-between; align-items: center; gap: 16px; border-top: 1px solid #ded8ca; padding: 15px 0; }
       .booking:first-child { border-top: 0; padding-top: 0; }
       .booking p { margin: 4px 0; }
+      .booking-actions { display: flex; flex-wrap: wrap; justify-content: end; gap: 8px; }
       .booking button { background: transparent; border: 1px solid #c8c1b3; color: #1f2933; padding: 7px 10px; }
       #message { min-height: 1.5em; margin: 14px 0 0; color: #a44d2b; }
       @media (max-width: 600px) { header { display: block; } .subtitle { margin-top: 12px; } form { grid-template-columns: 1fr; } .wide { grid-column: auto; } .booking { align-items: start; } }
@@ -83,6 +84,7 @@ const frontend = `<!doctype html>
       </section>
       <section>
         <h2>Current bookings</h2>
+        <button id="refresh-bookings" type="button">Refresh bookings</button>
         <div id="bookings">Loading...</div>
       </section>
     </main>
@@ -102,13 +104,30 @@ const frontend = `<!doctype html>
       const loadBookings = async () => {
         const response = await fetch('/api/bookings');
         const bookings = await response.json();
-        bookingsElement.innerHTML = bookings.length ? bookings.map((booking) => '<article class="booking"><div><strong>' + escapeHtml(booking.borrowerName) + '</strong><p>' + escapeHtml(booking.purpose) + '</p><span class="meta">' + escapeHtml(booking.equipmentId) + ' · ' + escapeHtml(formatDate(booking.startAt)) + ' to ' + escapeHtml(formatDate(booking.endAt)) + '</span></div><button data-id="' + escapeHtml(booking.id) + '">Delete</button></article>').join('') : '<p class="meta">No bookings yet.</p>';
+        bookingsElement.innerHTML = bookings.length ? bookings.map((booking) => '<article class="booking"><div><strong>' + escapeHtml(booking.borrowerName) + '</strong><p>' + escapeHtml(booking.purpose) + '</p><span class="meta">' + escapeHtml(booking.equipmentId) + ' · ' + escapeHtml(formatDate(booking.startAt)) + ' to ' + escapeHtml(formatDate(booking.endAt)) + '</span></div><div class="booking-actions"><button data-action="view" data-id="' + escapeHtml(booking.id) + '">View JSON</button><button data-action="edit" data-id="' + escapeHtml(booking.id) + '">Edit purpose</button><button data-action="delete" data-id="' + escapeHtml(booking.id) + '">Delete</button></div></article>').join('') : '<p class="meta">No bookings yet.</p>';
         bookingsElement.querySelectorAll('button').forEach((button) => button.addEventListener('click', async () => {
-          const response = await fetch('/api/bookings/' + button.dataset.id, { method: 'DELETE' });
+          const id = button.dataset.id;
+          if (button.dataset.action === 'view') {
+            const response = await fetch('/api/bookings/' + id);
+            const result = await response.json();
+            messageElement.textContent = response.ok ? JSON.stringify(result) : result.error;
+            return;
+          }
+          if (button.dataset.action === 'edit') {
+            const purpose = window.prompt('New purpose');
+            if (!purpose) return;
+            const response = await fetch('/api/bookings/' + id, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ purpose }) });
+            const result = await response.json();
+            messageElement.textContent = response.ok ? 'Booking updated.' : result.error;
+            if (response.ok) await loadBookings();
+            return;
+          }
+          const response = await fetch('/api/bookings/' + id, { method: 'DELETE' });
           messageElement.textContent = response.ok ? 'Booking deleted.' : 'Could not delete booking.';
           await loadBookings();
         }));
       };
+      document.querySelector('#refresh-bookings').addEventListener('click', loadBookings);
       document.querySelector('#booking-form').addEventListener('submit', async (event) => {
         event.preventDefault();
         const value = (id) => document.querySelector('#' + id).value;
