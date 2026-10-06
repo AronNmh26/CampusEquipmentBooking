@@ -22,7 +22,17 @@ The local API base URL is `http://localhost:8787/api`.
 
 The deployed Cloudflare API base URL is `https://campus-equipment-booking.aron078.workers.dev/api`.
 
-Open `http://localhost:8787` in a browser to use the minimalist frontend. It loads equipment and bookings from the API and supports creating and deleting bookings.
+Open `http://localhost:8787` in a browser to use the minimalist frontend. It loads equipment and bookings from the API and supports creating, viewing, updating, refreshing, and deleting bookings.
+
+## Submission Information
+
+- Source code: https://github.com/AronNmh26/CampusEquipmentBooking
+- Live frontend: https://campus-equipment-booking.aron078.workers.dev
+- Live API base URL: https://campus-equipment-booking.aron078.workers.dev/api
+- Local API base URL used for curl testing: `http://localhost:8787/api`
+- API contract and ERD: [API_CONTRACT.md](API_CONTRACT.md)
+- AI usage and verification: [AI_LOG.md](AI_LOG.md)
+- Quality Gate findings and fixes: [QUALITY_GATE_REVIEW.md](QUALITY_GATE_REVIEW.md)
 
 ## Endpoints
 
@@ -62,5 +72,8 @@ Curl checks were run against the local Wrangler server on 2026-10-06:
 - Existing and missing booking lookup -> `200` and `404`
 - `PATCH /bookings/:id` -> `200`
 - `DELETE /bookings/:id` -> `204`
+- Timezone-equivalent overlap -> `409`
+- Back-to-back booking at an exact boundary -> `201`
+- PATCH self-exclusion check -> `200`
 
 The complete observed responses are recorded in [AI_LOG.md](AI_LOG.md).
