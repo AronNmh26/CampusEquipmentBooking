@@ -143,6 +143,20 @@ const frontend = `<!doctype html>
 
 app.get('/', () => new Response(frontend, { headers: { 'Content-Type': 'text/html; charset=UTF-8' } }));
 
+app.get('/api', (context) =>
+  context.json({
+    name: 'Campus Equipment Booking API',
+    endpoints: [
+      'GET /api/equipment',
+      'GET /api/bookings',
+      'GET /api/bookings/:id',
+      'POST /api/bookings',
+      'PATCH /api/bookings/:id',
+      'DELETE /api/bookings/:id',
+    ],
+  }),
+);
+
 function toBooking(row: BookingRow) {
   return {
     id: row.id,

@@ -36,6 +36,7 @@ Open `http://localhost:8787` in a browser to use the minimalist frontend. It loa
 
 ## Endpoints
 
+- `GET /` (API information)
 - `GET /equipment`
 - `GET /bookings`
 - `GET /bookings/:id`

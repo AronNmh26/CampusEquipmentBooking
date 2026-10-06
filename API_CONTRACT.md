@@ -4,6 +4,10 @@
 
 `http://localhost:8787/api`
 
+### `GET /`
+
+Returns API information and the available endpoint list with status `200`. The deployed equivalent is `https://campus-equipment-booking.aron078.workers.dev/api`.
+
 ## Equipment
 
 ### `GET /equipment`
